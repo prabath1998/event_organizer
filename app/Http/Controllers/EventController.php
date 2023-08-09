@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateEventRequest;
+use App\Models\Country;
+use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
 
 class EventController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index():View
+    public function index(): View
     {
+
         return view('events.index');
     }
 
@@ -20,15 +26,27 @@ class EventController extends Controller
      */
     public function create()
     {
-        //
+        $countries = Country::all();
+        return view('events.create', compact('countries'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(CreateEventRequest $request)
     {
-        //
+
+        if ($request->hasFile('image')) {
+            $data = $request->validated();
+            $data['image'] = Storage::putFile('events', $request->file('image'));
+            $data['user_id'] = auth()->id();
+            $data['slug']  = Str::slug($request->title);
+
+            Event::create($data);
+            return to_route('events.index');
+        } else {
+            return back();
+        }
     }
 
     /**
