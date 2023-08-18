@@ -50,4 +50,8 @@ class Event extends Model
     {
         return $this->belongsToMany(Tag::class);
     }
+
+    public function hasTag($tag){
+        return $this->tags->contains($tag);
+    }
 }
